@@ -80,8 +80,12 @@ namespace AssetStudio
         /// </summary>
         StoresTypeDependencies = 21,
         /// <summary>
-        /// 2020.1 to x
+        /// 2020.1 to 2023.1
         /// </summary>
-        LargeFilesSupport = 22
+        LargeFilesSupport = 22,
+        /// <summary>
+        /// 2023.2 to Unity 6
+        /// </summary>
+        StoresTypeTreeBlobExtra = 23
     }
 }

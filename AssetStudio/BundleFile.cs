@@ -429,7 +429,13 @@ namespace AssetStudio
 
             byte[] sharedCompressedBuff = null;
             byte[] sharedUncompressedBuff = null;
-            if (blocksCompression > CompressionType.Lzma)
+            // Allocate shared buffers if ANY block needs decompression beyond LZMA
+            var anyBlockNeedsBuffer = m_BlocksInfo.Any(x =>
+            {
+                var ct = (CompressionType)(x.flags & StorageBlockFlags.CompressionTypeMask);
+                return ct > CompressionType.Lzma;
+            }) || (customBlockCompression != CompressionType.Auto && customBlockCompression > CompressionType.Lzma);
+            if (anyBlockNeedsBuffer && blockSize > 0)
             {
                 sharedCompressedBuff = BigArrayPool<byte>.Shared.Rent(blockSize);
                 sharedUncompressedBuff = BigArrayPool<byte>.Shared.Rent(blockSize);

@@ -268,15 +268,26 @@ namespace AssetStudio
 
             if (m_EnableTypeTree)
             {
-                type.m_Type = new TypeTree();
-                type.m_Type.m_Nodes = new List<TypeTreeNode>();
-                if (header.m_Version >= SerializedFileFormatVersion.Unknown_12 || header.m_Version == SerializedFileFormatVersion.Unknown_10)
+                var hasBlob = true;
+                if (header.m_Version >= SerializedFileFormatVersion.StoresTypeTreeBlobExtra)
                 {
-                    TypeTreeBlobRead(type.m_Type);
+                    type.m_TypeTreeHash = reader.ReadBytes(16);
+                    var blobSize = reader.ReadInt32();
+                    hasBlob = blobSize > 0;
                 }
-                else
+
+                if (hasBlob)
                 {
-                    ReadTypeTree(type.m_Type);
+                    type.m_Type = new TypeTree();
+                    type.m_Type.m_Nodes = new List<TypeTreeNode>();
+                    if (header.m_Version >= SerializedFileFormatVersion.Unknown_12 || header.m_Version == SerializedFileFormatVersion.Unknown_10)
+                    {
+                        TypeTreeBlobRead(type.m_Type);
+                    }
+                    else
+                    {
+                        ReadTypeTree(type.m_Type);
+                    }
                 }
                 if (header.m_Version >= SerializedFileFormatVersion.StoresTypeDependencies)
                 {
@@ -328,6 +339,12 @@ namespace AssetStudio
 
         private void TypeTreeBlobRead(TypeTree m_Type)
         {
+            if (header.m_Version >= SerializedFileFormatVersion.StoresTypeTreeBlobExtra)
+            {
+                var magic = reader.ReadUInt32();
+                var formatVersion = reader.ReadInt32();
+            }
+
             int numberOfNodes = reader.ReadInt32();
             int stringBufferSize = reader.ReadInt32();
             for (var i = 0; i < numberOfNodes; i++)
